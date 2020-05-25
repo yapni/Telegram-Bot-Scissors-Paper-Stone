@@ -301,24 +301,6 @@ def main():
     updater = Updater(token=TOKEN, use_context=True)
     dispatcher = updater.dispatcher
 
-    # Set up webhook/poll, depending on dev or prod mode
-    if MODE == 'dev':
-        # Use polling (i.e. getUpdates API method) if in development mode:
-        # Periodically connects to Telegram's servers to check for new update
-        LOGGER.info("Starting bot in development mode...")
-        updater.start_polling()
-    elif MODE == 'prod':
-        # Use webhooks if in production mode:
-        # Whenever a new update for our bot arrives, Telegram sends that update to a specified URL.
-        LOGGER.info("Starting bot in production mode...")
-        updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN)
-        updater.bot.set_webhook('https://{}.herokuapp.com/{}'.format(HEROKU_APP_NAME, TOKEN))
-        LOGGER.info("Webhook set at https://{}.herokuapp.com/<token>".format(HEROKU_APP_NAME))
-
-    else:
-        LOGGER.error("Invalid TELEGRAM_SPS_BOT_MODE value! Should be 'dev' or 'prod'.")
-        sys.exit(1)
-
     # Register callback functions
     start_handler = CommandHandler('start', start)
     dispatcher.add_handler(start_handler)
@@ -335,8 +317,23 @@ def main():
     move_handler = MessageHandler(Filters.text([SCISSORS, PAPER, STONE]), handle_move)
     dispatcher.add_handler(move_handler)
 
-    # Start the bot
-    updater.start_polling()
+    # Set up webhook/poll, depending on dev or prod mode
+    if MODE == 'dev':
+        # Use polling (i.e. getUpdates API method) if in development mode:
+        # Periodically connects to Telegram's servers to check for new update
+        LOGGER.info("Starting bot in development mode...")
+        updater.start_polling()
+    elif MODE == 'prod':
+        # Use webhooks if in production mode:
+        # Whenever a new update for our bot arrives, Telegram sends that update to a specified URL.
+        LOGGER.info("Starting bot in production mode...")
+        updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN)
+        updater.bot.set_webhook('https://{}.herokuapp.com/{}'.format(HEROKU_APP_NAME, TOKEN))
+        LOGGER.info("Webhook set at https://{}.herokuapp.com/<token>".format(HEROKU_APP_NAME))
+        updater.idle()
+    else:
+        LOGGER.error("Invalid TELEGRAM_SPS_BOT_MODE value! Should be 'dev' or 'prod'.")
+        sys.exit(1)
 
 if __name__ == '__main__':
     main()
