@@ -17,7 +17,7 @@ import sys
 
 # Fetch required variables
 TOKEN = os.getenv('TELEGRAM_SPS_BOT_TOKEN') # Authentication token for this bot
-PORT = int(os.environ.get('PORT', 8443)) # Port number to listen for the webhook (default: 8443)
+PORT = int(os.environ.get('TELEGRAM_SPS_BOT_PORT', 8443)) # Port number to listen for the webhook (default: 8443)
 MODE = os.getenv('TELEGRAM_SPS_BOT_MODE') # Development ('dev') mode or production mode ('prod')
 HEROKU_APP_NAME = os.getenv('TELEGRAM_SPS_BOT_HEROKU_NAME') 
 
@@ -313,6 +313,7 @@ def main():
         LOGGER.info("Starting bot in production mode...")
         updater.start_webhook(listen='0.0.0.0', port=PORT, url_path=TOKEN)
         updater.bot.set_webhook('https://{}.herokuapp.com/{}'.format(HEROKU_APP_NAME, TOKEN))
+        LOGGER.info("Webhook set at https://{}.herokuapp.com/<token>".format(HEROKU_APP_NAME))
 
     else:
         LOGGER.error("Invalid TELEGRAM_SPS_BOT_MODE value! Should be 'dev' or 'prod'.")
